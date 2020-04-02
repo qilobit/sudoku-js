@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 });
 
-button.addEventListener('click', test);
+button.addEventListener('click', calculateGame);
 
 //  Build the table
 function init(){
@@ -24,18 +24,20 @@ function createBox(col, row, fill){
     textBox.type = 'text';
     textBox.className = 'box';
     textBox.id = `${col}_${row}`;
+    textBox.maxLength = 1;
     if(fill){
         textBox.value = getRandomInt();
     }
-    textBox.addEventListener('blur', test);
+    textBox.addEventListener('blur', calculateGame);
     return textBox;
 }
 
 function getRandomInt(){
-    return Number.parseInt(Math.random() * 10);
+    let num = Number.parseInt(Math.random() * 10);
+    return num == 0 ? getRandomInt() : num;
 }
 
-function test(){
+function calculateGame(){
     console.log('Testing game');
     const boxes = Array.from(document.querySelectorAll('.box'));
     let col = null; 
@@ -43,6 +45,7 @@ function test(){
     let id = null;
     let boxesSameRow = null;
     let boxesSameCol = null;
+    let repeatedInRow = false;
     boxes.forEach(box => {
         id = box.id.split('_');
         col = id[0];
@@ -50,7 +53,7 @@ function test(){
 
         boxesSameRow = boxes.filter(b => {
             const id = b.id.split('_');
-            return id[1] == row && id[0] != col && !!b.value;
+            return id[1] == row && id[0] != col && b.value !== '';
         }).map(node => node.value);
 
         boxesSameCol = boxes.filter(b => {
@@ -58,14 +61,21 @@ function test(){
             return id[0] == col && id[1] != row;
         }).map(node => node.value);
 
-        if(boxesSameRow.indexOf(box.value) !== -1){
-            box.classList.add('repeated');
-            console.log(`${col}_${row} = ${box.value}`);
+        if(box.value !== '' && boxesSameRow.indexOf(box.value) !== -1){
+            repeatedInRow = true;
+            box.className = 'box repeated';
+            console.log(`REPETIDO FILA ${col}_${row} = ${box.value}`);
+        }else{
+            box.className = 'box white';
         }
 
-        if(boxesSameCol.indexOf(box.value) !== -1){
-            box.classList.add('repeated');
-            console.log(`${col}_${row} = ${box.value}`);
+        if(repeatedInRow)   return;
+
+        if(box.value !== '' && boxesSameCol.indexOf(box.value) !== -1){
+            box.className = 'box repeated';
+            console.log(`REPETIDO COLUMNA ${col}_${row} = ${box.value}`);
+        }else{
+            box.className = 'box white';
         }
     });
 }
